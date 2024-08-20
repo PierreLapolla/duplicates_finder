@@ -52,6 +52,7 @@ def convert_size(size_bytes: int) -> str:
 
 
 def save_csv(df: pd.DataFrame, dir: Path, filename: str) -> None:
+    """Save the DataFrame to a CSV file in the given directory."""
     dir.mkdir(parents=True, exist_ok=True)
     output_path = dir / filename
     df.to_csv(output_path, index=False)

@@ -5,6 +5,7 @@ allowed_extensions:
   - '.CR3'
   - '.pdf'
   - '.csv'
+  - '.py'
 
 chunk_size: 16384
 max_workers: 16
@@ -26,6 +27,7 @@ translations:
     enter_directory: "Enter the directory to scan for duplicates: "
     invalid_directory: "Invalid directory selected"
     select_language: "Select language (en/fr): "
+    preparing_parallel: "Preparing parallel processing"
   fr:
     permission_denied: "Permission refusée : Impossible d'accéder au fichier {file_path}"
     error_hashing_file: "Erreur de hachage du fichier {file_path} : {error}"
@@ -41,3 +43,4 @@ translations:
     enter_directory: "Entrez le répertoire à analyser pour les doublons : "
     invalid_directory: "Répertoire sélectionné invalide"
     select_language: "Sélectionnez la langue (en/fr) : "
+    preparing_parallel: "Préparation du traitement parallèle"

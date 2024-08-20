@@ -1,5 +1,4 @@
-
-from concurrent.futures import as_completed, ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import as_completed, ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -27,7 +26,8 @@ def find_duplicate_files(directory: Union[str, Path]) -> Dict[str, List[Path]]:
              file.is_file() and file.suffix in config['allowed_extensions']]
 
     with ThreadPoolExecutor(max_workers=config['max_workers']) as executor:
-        future_to_file = {executor.submit(calculate_file_hash, file): file for file in files}
+        future_to_file = {executor.submit(calculate_file_hash, file): file for file in
+                          tqdm(files, total=len(files), desc=translate("preparing_parallel"))}
 
         for future in tqdm(as_completed(future_to_file), total=len(future_to_file),
                            desc=translate("processing_files", num_workers=config['max_workers'])):
@@ -80,7 +80,6 @@ def show_duplicates(duplicates: Dict[str, List[Path]]) -> Optional[pd.DataFrame]
 def main() -> None:
     directory = select_directory()
     duplicates = find_duplicate_files(directory)
-
     df = show_duplicates(duplicates)
     save_csv(df, Path("out"), f"duplicates_report_{datetime.now().strftime('%Y_%m_%d__%H_%M_%S')}.csv")
 

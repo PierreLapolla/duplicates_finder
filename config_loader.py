@@ -1,6 +1,6 @@
+import multiprocessing
 from pathlib import Path
 from typing import Union
-import multiprocessing
 
 import yaml
 
