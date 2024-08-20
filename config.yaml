@@ -1,0 +1,43 @@
+allowed_extensions:
+  - '.png'
+  - '.jpg'
+  - '.jpeg'
+  - '.CR3'
+  - '.pdf'
+  - '.csv'
+
+chunk_size: 16384
+max_workers: 16
+language: "fr"
+
+translations:
+  en:
+    permission_denied: "Permission Denied: Cannot access file {file_path}"
+    error_hashing_file: "Error hashing file {file_path}: {error}"
+    scanning_files: "Scanning files"
+    filtering_files: "Filtering files"
+    processing_files: "Processing files using {num_workers} workers"
+    error_accessing_files: "Error accessing files in directory {directory}: {error}"
+    error_processing_file: "Error processing file {file}: {error}"
+    no_duplicates_found: "No duplicate files found."
+    results_written: "Results written to {output_file}"
+    total_files_to_delete: "Total files to delete (if you keep one copy of each duplicate): {num_file_to_delete}"
+    total_space_saved: "Total space that can be saved: {space_saved}"
+    enter_directory: "Enter the directory to scan for duplicates: "
+    invalid_directory: "Invalid directory selected"
+    select_language: "Select language (en/fr): "
+  fr:
+    permission_denied: "Permission refusée : Impossible d'accéder au fichier {file_path}"
+    error_hashing_file: "Erreur de hachage du fichier {file_path} : {error}"
+    scanning_files: "Analyse des fichiers"
+    filtering_files: "Filtrage des fichiers"
+    processing_files: "Traitement des fichiers avec {num_workers} travailleurs"
+    error_accessing_files: "Erreur lors de l'accès aux fichiers dans le répertoire {directory} : {error}"
+    error_processing_file: "Erreur de traitement du fichier {file} : {error}"
+    no_duplicates_found: "Aucun fichier en double trouvé."
+    results_written: "Résultats écrits dans {output_file}"
+    total_files_to_delete: "Total des fichiers à supprimer (si vous gardez une copie de chaque duplicata) : {num_file_to_delete}"
+    total_space_saved: "Espace total pouvant être sauvegardé : {space_saved}"
+    enter_directory: "Entrez le répertoire à analyser pour les doublons : "
+    invalid_directory: "Répertoire sélectionné invalide"
+    select_language: "Sélectionnez la langue (en/fr) : "
