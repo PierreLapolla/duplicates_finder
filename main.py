@@ -18,12 +18,11 @@ def find_duplicate_files(directory: Union[str, Path]) -> Dict[str, List[Path]]:
     file_hashes: Dict[str, List[Path]] = {}
     try:
         files = list(tqdm(directory.rglob("*"), desc=translate("scanning_files")))
+        files = [file for file in tqdm(files, total=len(files), desc=translate("filtering_files")) if
+                 file.is_file() and file.suffix in config['allowed_extensions']]
     except Exception as e:
         print(translate("error_accessing_files", directory=directory, error=e))
         exit(1)
-
-    files = [file for file in tqdm(files, total=len(files), desc=translate("filtering_files")) if
-             file.is_file() and file.suffix in config['allowed_extensions']]
 
     with ThreadPoolExecutor(max_workers=config['max_workers']) as executor:
         future_to_file = {executor.submit(calculate_file_hash, file): file for file in
@@ -77,11 +76,29 @@ def show_duplicates(duplicates: Dict[str, List[Path]]) -> Optional[pd.DataFrame]
     return pd.DataFrame(data)
 
 
+def remove_duplicates(df: pd.DataFrame) -> None:
+    """Prompt the user to delete duplicate files, keeping one of each unique file based on the hash."""
+    duplicates = df[df.duplicated(subset='hash', keep='first')]
+
+    if duplicates.empty:
+        print(translate("no_duplicates_found"))
+        return
+
+    response = input(translate("delete_files"))
+    if response.lower() in ["yes", "y", "oui", "o"]:
+        for _, row in duplicates.iterrows():
+            try:
+                Path(row['path']).unlink()
+            except Exception as e:
+                print(translate("error_deleting_file", file_path=row['path'], error=e))
+
+
 def main() -> None:
     directory = select_directory()
     duplicates = find_duplicate_files(directory)
     df = show_duplicates(duplicates)
     save_csv(df, Path("out"), f"duplicates_report_{datetime.now().strftime('%Y_%m_%d__%H_%M_%S')}.csv")
+    remove_duplicates(df)
 
 
 if __name__ == "__main__":

@@ -44,7 +44,11 @@ def convert_size(size_bytes: int) -> str:
     if size_bytes == 0:
         return "0B"
 
-    size_name = ("B", "Ko", "Mo", "Go", "To", "Po", "Eo", "Zo", "Yo")
+    if config['language'] == "fr":
+        size_name = ("o", "Ko", "Mo", "Go", "To", "Po", "Eo", "Zo", "Yo")
+    else:
+        size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+
     i = int(math.log(size_bytes, 1024))
     p = math.pow(1024, i)
     s = round(size_bytes / p, 3)

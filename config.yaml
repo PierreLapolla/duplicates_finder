@@ -5,7 +5,6 @@ allowed_extensions:
   - '.CR3'
   - '.pdf'
   - '.csv'
-  - '.py'
 
 chunk_size: 16384
 max_workers: 16
@@ -28,6 +27,8 @@ translations:
     invalid_directory: "Invalid directory selected"
     select_language: "Select language (en/fr): "
     preparing_parallel: "Preparing parallel processing"
+    delete_files: "Do you want to delete the duplicate files? (keep one copy of each) (y/n): "
+    error_deleting_file: "Error deleting file {file}: {error}"
   fr:
     permission_denied: "Permission refusée : Impossible d'accéder au fichier {file_path}"
     error_hashing_file: "Erreur de hachage du fichier {file_path} : {error}"
@@ -44,3 +45,5 @@ translations:
     invalid_directory: "Répertoire sélectionné invalide"
     select_language: "Sélectionnez la langue (en/fr) : "
     preparing_parallel: "Préparation du traitement parallèle"
+    delete_files: "Voulez-vous supprimer les fichiers en double ? (garde une copie de chaque) (o/n) : "
+    error_deleting_file: "Erreur lors de la suppression du fichier {file} : {error}"
