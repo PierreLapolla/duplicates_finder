@@ -7,7 +7,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from config_loader import config
-from helpers import calculate_file_hash, convert_size, save_csv, select_directory
+from helpers import calculate_file_hash, convert_size, save_results, select_directory
 
 
 def find_duplicate_files(directory: Union[str, Path]) -> Dict[str, List[Path]]:
@@ -95,7 +95,7 @@ def main() -> None:
     directory = select_directory()
     duplicates = find_duplicate_files(directory)
     df = show_duplicates(duplicates)
-    save_csv(df, Path("out"), f"duplicates_report_{datetime.now().strftime('%Y_%m_%d__%H_%M_%S')}.csv")
+    save_results(df, Path("out"), f"duplicates_report_{datetime.now().strftime('%Y_%m_%d__%H_%M_%S')}")
     remove_duplicates(df)
 
 

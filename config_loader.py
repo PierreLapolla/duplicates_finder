@@ -1,11 +1,10 @@
 import multiprocessing
 from pathlib import Path
-from typing import Union
 
 import yaml
 
 default_config_dict = {
-    'allowed_extensions': ['.png', '.jpg', '.jpeg', '.CR3', '.pdf', '.csv'],
+    'allowed_extensions': ['.png', '.jpg', '.jpeg'],
     'chunk_size': 16384,
     'max_workers': 16
 }

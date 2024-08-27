@@ -46,9 +46,10 @@ def convert_size(size_bytes: int) -> str:
     return f"{s} {size_name[i]}"
 
 
-def save_csv(df: pd.DataFrame, dir: Path, filename: str) -> None:
+def save_results(df: pd.DataFrame, dir: Path, filename: str) -> None:
     """Save the DataFrame to a CSV file in the given directory."""
     dir.mkdir(parents=True, exist_ok=True)
     output_path = dir / filename
-    df.to_csv(output_path, index=False)
+    df.to_csv(output_path.with_suffix(".csv"), index=False)
+    df.to_excel(output_path.with_suffix(".xlsx"), index=False)
     print(f"Results written to {output_path}")
