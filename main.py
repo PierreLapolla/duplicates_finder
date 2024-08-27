@@ -7,7 +7,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from config_loader import config
-from helpers import calculate_file_hash, convert_size, save_csv, select_directory, translate
+from helpers import calculate_file_hash, convert_size, save_csv, select_directory
 
 
 def find_duplicate_files(directory: Union[str, Path]) -> Dict[str, List[Path]]:
@@ -17,19 +17,18 @@ def find_duplicate_files(directory: Union[str, Path]) -> Dict[str, List[Path]]:
 
     file_hashes: Dict[str, List[Path]] = {}
     try:
-        files = list(tqdm(directory.rglob("*"), desc=translate("scanning_files")))
-        files = [file for file in tqdm(files, total=len(files), desc=translate("filtering_files")) if
+        files = list(tqdm(directory.rglob("*"), desc="Scanning files"))
+        files = [file for file in tqdm(files, total=len(files), desc="Filtering files") if
                  file.is_file() and file.suffix in config['allowed_extensions']]
     except Exception as e:
-        print(translate("error_accessing_files", directory=directory, error=e))
-        exit(1)
+        raise Exception(f"Error accessing files in directory {directory}: {e}")
 
     with ThreadPoolExecutor(max_workers=config['max_workers']) as executor:
         future_to_file = {executor.submit(calculate_file_hash, file): file for file in
-                          tqdm(files, total=len(files), desc=translate("preparing_parallel"))}
+                          tqdm(files, total=len(files), desc="Preparing parallel processing")}
 
         for future in tqdm(as_completed(future_to_file), total=len(future_to_file),
-                           desc=translate("processing_files", num_workers=config['max_workers'])):
+                           desc=f"Processing files using {config['max_workers']} workers"):
             file = future_to_file[future]
             try:
                 file_hash = future.result()
@@ -39,13 +38,12 @@ def find_duplicate_files(directory: Union[str, Path]) -> Dict[str, List[Path]]:
                     else:
                         file_hashes[file_hash] = [file]
             except Exception as e:
-                print(translate("error_processing_file", file=file, error=e))
+                print(f"Error processing file {file}: {e}")
 
     duplicates = {hash: paths for hash, paths in file_hashes.items() if len(paths) > 1}
 
     if not duplicates:
-        print(translate("no_duplicates_found"))
-        exit(0)
+        print("No duplicate files found.")
 
     return duplicates
 
@@ -70,8 +68,8 @@ def show_duplicates(duplicates: Dict[str, List[Path]]) -> Optional[pd.DataFrame]
                 "size": file_path.stat().st_size
             })
 
-    print(translate("total_files_to_delete", num_file_to_delete=num_file_to_delete))
-    print(translate("total_space_saved", space_saved=convert_size(total_space_saved)))
+    print(f"Total files to delete (if you keep one copy of each duplicate): {num_file_to_delete}")
+    print(f"Total space that can be saved: {convert_size(total_space_saved)}")
 
     return pd.DataFrame(data)
 
@@ -81,16 +79,16 @@ def remove_duplicates(df: pd.DataFrame) -> None:
     duplicates = df[df.duplicated(subset='hash', keep='first')]
 
     if duplicates.empty:
-        print(translate("no_duplicates_found"))
+        print("No duplicate files to delete.")
         return
 
-    response = input(translate("delete_files"))
-    if response.lower() in ["yes", "y", "oui", "o"]:
+    response = input("Do you want to delete the duplicate files? (keep one copy of each) (y/n): ")
+    if response.lower() in ["yes", "y"]:
         for _, row in duplicates.iterrows():
             try:
                 Path(row['path']).unlink()
             except Exception as e:
-                print(translate("error_deleting_file", file_path=row['path'], error=e))
+                print(f"Error deleting file {row['path']}: {e}")
 
 
 def main() -> None:
@@ -102,4 +100,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        input("Press any key to quit")

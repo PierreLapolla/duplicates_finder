@@ -8,18 +8,12 @@ import pandas as pd
 from config_loader import config
 
 
-def translate(key: str, **kwargs) -> str:
-    """Translate a message key to the current language."""
-    return config['translations'][config['language']][key].format(**kwargs)
-
-
 def select_directory() -> Path:
     """Prompt the user to enter a directory path."""
-    selected_directory = input(translate("enter_directory"))
+    selected_directory = input("Enter the directory to scan for duplicates: ")
     path = Path(selected_directory).expanduser().resolve()
     if not path.is_dir():
-        print(translate("invalid_directory"))
-        exit(1)
+        raise NotADirectoryError(f"{path} is not a valid directory.")
     return path
 
 
@@ -32,10 +26,10 @@ def calculate_file_hash(file_path: Path) -> Optional[str]:
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
     except PermissionError:
-        print(translate("permission_denied", file_path=file_path))
+        print(f"Permission Denied: Cannot access file {file_path}")
         return None
     except Exception as e:
-        print(translate("error_hashing_file", file_path=file_path, error=e))
+        print(f"Error hashing file {file_path}: {e}")
         return None
 
 
@@ -60,4 +54,4 @@ def save_csv(df: pd.DataFrame, dir: Path, filename: str) -> None:
     dir.mkdir(parents=True, exist_ok=True)
     output_path = dir / filename
     df.to_csv(output_path, index=False)
-    print(translate("results_written", output_file=output_path))
+    print(f"Results written to {output_path}")
