@@ -18,8 +18,11 @@ def find_duplicate_files(directory: Union[str, Path]) -> Dict[str, List[Path]]:
     file_hashes: Dict[str, List[Path]] = {}
     try:
         files = list(tqdm(directory.rglob("*"), desc="Scanning files"))
-        files = [file for file in tqdm(files, total=len(files), desc="Filtering files") if
-                 file.is_file() and file.suffix in config['allowed_extensions']]
+        if config['check_all_extensions']:
+            files = [file for file in tqdm(files, total=len(files), desc="Filtering files") if file.is_file()]
+        else:
+            files = [file for file in tqdm(files, total=len(files), desc="Filtering files") if
+                     file.is_file() and file.suffix in config['allowed_extensions']]
     except Exception as e:
         raise Exception(f"Error accessing files in directory {directory}: {e}")
 

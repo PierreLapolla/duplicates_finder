@@ -4,6 +4,7 @@ from pathlib import Path
 import yaml
 
 default_config_dict = {
+    'check_all_extensions': False,
     'allowed_extensions': ['.png', '.jpg', '.jpeg'],
     'chunk_size': 16384,
     'max_workers': 16
