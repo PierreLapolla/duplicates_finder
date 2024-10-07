@@ -1,77 +1,50 @@
-from concurrent.futures import as_completed, ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List
 
 import pandas as pd
 from tqdm import tqdm
 
-from config_loader import config
-from helpers import calculate_file_hash, convert_size, save_results, select_directory
+from helpers import convert_size, file_filter, file_hash, file_scan, save_results, select_directory
 
 
-def find_duplicate_files(directory: Union[str, Path]) -> Dict[str, List[Path]]:
-    """Find and return a dictionary of duplicate files in the given directory."""
-    if isinstance(directory, str):
-        directory = Path(directory)
+def find_duplicates(files: List[Path]) -> Dict[str, List[Path]]:
+    """Return a dictionary of duplicate files based on their hash."""
+    duplicates = {}
 
-    file_hashes: Dict[str, List[Path]] = {}
-    try:
-        files = list(tqdm(directory.rglob("*"), desc="Scanning files"))
-        if config['check_all_extensions']:
-            files = [file for file in tqdm(files, total=len(files), desc="Filtering files") if file.is_file()]
+    for file in tqdm(files, desc="Calculating hashes", total=len(files)):
+        file_hash_value = file_hash(file)
+        if file_hash_value is None:
+            continue
+
+        if file_hash_value in duplicates:
+            duplicates[file_hash_value].append(file)
         else:
-            files = [file for file in tqdm(files, total=len(files), desc="Filtering files") if
-                     file.is_file() and file.suffix in config['allowed_extensions']]
-    except Exception as e:
-        raise Exception(f"Error accessing files in directory {directory}: {e}")
+            duplicates[file_hash_value] = [file]
 
-    with ThreadPoolExecutor(max_workers=config['max_workers']) as executor:
-        future_to_file = {executor.submit(calculate_file_hash, file): file for file in
-                          tqdm(files, total=len(files), desc="Preparing parallel processing")}
-
-        for future in tqdm(as_completed(future_to_file), total=len(future_to_file),
-                           desc=f"Processing files using {config['max_workers']} workers"):
-            file = future_to_file[future]
-            try:
-                file_hash = future.result()
-                if file_hash:
-                    if file_hash in file_hashes:
-                        file_hashes[file_hash].append(file)
-                    else:
-                        file_hashes[file_hash] = [file]
-            except Exception as e:
-                print(f"Error processing file {file}: {e}")
-
-    duplicates = {hash: paths for hash, paths in file_hashes.items() if len(paths) > 1}
-
-    if not duplicates:
-        print("No duplicate files found.")
+    duplicates = {hash_value: paths for hash_value, paths in duplicates.items() if len(paths) > 1}
 
     return duplicates
 
 
-def show_duplicates(duplicates: Dict[str, List[Path]]) -> Optional[pd.DataFrame]:
+def get_duplicates_df(duplicates: Dict[str, List[Path]]) -> pd.DataFrame:
     """Return a DataFrame of duplicate files and print a summary."""
     data = []
     total_space_saved = 0
-    num_duplicates = sum(len(paths) for paths in duplicates.values())
-    num_file_to_delete = num_duplicates - len(duplicates)
 
-    for file_hash, paths in duplicates.items():
+    for hash_value, paths in duplicates.items():
         group_size = sum(file.stat().st_size for file in paths)
         size_to_keep = paths[0].stat().st_size
         space_saved = group_size - size_to_keep
         total_space_saved += space_saved
 
-        for file_path in paths:
+        for path in paths:
             data.append({
-                "hash": file_hash,
-                "path": str(file_path),
-                "size": file_path.stat().st_size
+                "hash": hash_value,
+                "path": str(path),
+                "size": path.stat().st_size
             })
 
-    print(f"Total files to delete (if you keep one copy of each duplicate): {num_file_to_delete}")
     print(f"Total space that can be saved: {convert_size(total_space_saved)}")
 
     return pd.DataFrame(data)
@@ -91,15 +64,17 @@ def remove_duplicates(df: pd.DataFrame) -> None:
             try:
                 Path(row['path']).unlink()
             except Exception as e:
-                print(f"Error deleting file {row['path']}: {e}")
+                print(f"An unexpected error occurred with {row['path']}: {e}")
 
 
 def main() -> None:
     directory = select_directory()
-    duplicates = find_duplicate_files(directory)
-    df = show_duplicates(duplicates)
+    file_list = file_scan(directory)
+    file_list = file_filter(file_list)
+    duplicates = find_duplicates(file_list)
+    df = get_duplicates_df(duplicates)
     save_results(df, Path("out"), f"duplicates_report_{datetime.now().strftime('%Y_%m_%d__%H_%M_%S')}")
-    remove_duplicates(df)
+    # remove_duplicates(df)
 
 
 if __name__ == "__main__":
