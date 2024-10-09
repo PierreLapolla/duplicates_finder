@@ -28,19 +28,17 @@ def file_scan() -> List[Path]:
 
     for directory in config['search_directories']:
         directory = Path(directory).expanduser().resolve()
+        if not directory.is_dir():
+            print(f"Skipping {directory}: not a valid directory.")
+            continue
+
         with tqdm(desc=f"Scanning files in {directory}") as pbar:
             for root, _, files in os.walk(directory):
                 root_path = Path(root)
                 for file_name in files:
                     file_path = root_path / file_name
-                    try:
+                    if file_path.is_file():
                         file_list.append(file_path)
-                    except (PermissionError, FileNotFoundError) as e:
-                        if config['print_exceptions']:
-                            print(f"Skipped {file_path}: {e}")
-                    except Exception as e:
-                        if config['print_exceptions']:
-                            print(f"An unexpected error occurred with {file_path}: {e}")
                     pbar.update(1)
 
     return file_list

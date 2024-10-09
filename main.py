@@ -55,10 +55,6 @@ def remove_duplicates(df: pd.DataFrame) -> None:
     """Prompt the user to delete duplicate files, keeping one of each unique file based on the hash."""
     duplicates = df[df.duplicated(subset='hash', keep='first')]
 
-    if duplicates.empty:
-        print("No duplicate files to delete.")
-        return
-
     response = input("Do you want to delete the duplicate files? (keep one copy of each) (y/n): ")
     if response.lower() in ["yes", "y"]:
         for _, row in duplicates.iterrows():
@@ -74,6 +70,11 @@ def main() -> None:
     file_list = file_filter(file_list)
     duplicates = find_duplicates(file_list)
     df = get_duplicates_df(duplicates)
+
+    if df.empty:
+        print("No duplicate files found.")
+        return
+
     save_results(df, Path("out"), f"duplicates_report_{datetime.now().strftime('%Y_%m_%d__%H_%M_%S')}")
     # remove_duplicates(df)
 
