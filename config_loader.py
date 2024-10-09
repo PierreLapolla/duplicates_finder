@@ -3,6 +3,7 @@ from pathlib import Path
 import yaml
 
 default_config_dict = {
+    'search_directories': ['/home/pierre'],
     'allowed_extensions': ['.png', '.jpg', '.jpeg'],
     'chunk_size': 16384,
     'print_exceptions': False,

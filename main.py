@@ -5,6 +5,7 @@ from typing import Dict, List
 import pandas as pd
 from tqdm import tqdm
 
+from config_loader import config
 from helpers import convert_size, file_filter, file_hash, file_scan, save_results, select_directory
 
 
@@ -64,12 +65,12 @@ def remove_duplicates(df: pd.DataFrame) -> None:
             try:
                 Path(row['path']).unlink()
             except Exception as e:
-                print(f"An unexpected error occurred with {row['path']}: {e}")
+                if config['print_exceptions']:
+                    print(f"An unexpected error occurred with {row['path']}: {e}")
 
 
 def main() -> None:
-    directory = select_directory()
-    file_list = file_scan(directory)
+    file_list = file_scan()
     file_list = file_filter(file_list)
     duplicates = find_duplicates(file_list)
     df = get_duplicates_df(duplicates)

@@ -19,29 +19,30 @@ def select_directory() -> Path:
     return path
 
 
-def file_scan(directory: Path) -> List[Path]:
+def file_scan() -> List[Path]:
     """Custom recursive file collector that handles permission errors gracefully."""
-    try:
-        return list(tqdm(directory.rglob("*"), desc="Scanning files"))
-    except Exception:
-        print(f"An error occurred with {directory}, starting safe scan.")
-
     file_list = []
-    with tqdm(desc="Scanning files") as pbar:
-        for root, _, files in os.walk(directory):
-            root_path = Path(root)
-            for file_name in files:
-                file_path = root_path / file_name
-                try:
-                    file_path = file_path.resolve(strict=True)
-                    file_list.append(file_path)
-                except (PermissionError, FileNotFoundError) as e:
-                    if config['print_exceptions']:
-                        print(f"Skipped {file_path}: {e}")
-                except Exception as e:
-                    if config['print_exceptions']:
-                        print(f"An unexpected error occurred with {file_path}: {e}")
-                pbar.update(1)
+
+    if not config['search_directories']:
+        raise ValueError("No search directories provided in the configuration, please add at least one.")
+
+    for directory in config['search_directories']:
+        directory = Path(directory).expanduser().resolve()
+        with tqdm(desc=f"Scanning files in {directory}") as pbar:
+            for root, _, files in os.walk(directory):
+                root_path = Path(root)
+                for file_name in files:
+                    file_path = root_path / file_name
+                    try:
+                        file_list.append(file_path)
+                    except (PermissionError, FileNotFoundError) as e:
+                        if config['print_exceptions']:
+                            print(f"Skipped {file_path}: {e}")
+                    except Exception as e:
+                        if config['print_exceptions']:
+                            print(f"An unexpected error occurred with {file_path}: {e}")
+                    pbar.update(1)
+
     return file_list
 
 
