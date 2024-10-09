@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 import pandas as pd
 from tqdm import tqdm
@@ -13,8 +13,15 @@ from helpers import convert_size, file_filter, file_hash, file_scan, save_result
 def find_duplicates(files: List[Path]) -> Dict[str, List[Path]]:
     """Return a dictionary of duplicate files based on their hash, optimized for speed."""
     duplicates = {}
+    choices = {
+        'thread': ThreadPoolExecutor,
+        'process': ProcessPoolExecutor,
+    }
+    executor = choices[config['parallel_executor']] if config['parallel_executor'] in choices else None
+    if executor is None:
+        raise ValueError("Invalid parallel executor selected in the configuration (thread, process).")
 
-    with ThreadPoolExecutor() as executor:
+    with executor(max_workers=config['max_workers']) as executor:
         future_to_file = {executor.submit(file_hash, file): file for file in tqdm(files, desc="Preparing parallel hashing", total=len(files))}
 
         for future in tqdm(as_completed(future_to_file), total=len(files), desc="Calculating hashes"):

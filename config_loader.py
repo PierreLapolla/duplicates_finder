@@ -3,8 +3,10 @@ from pathlib import Path
 import yaml
 
 default_config_dict = {
-    'search_directories': ['/home/pierre'],
+    'search_directories': ['/home'],
     'allowed_extensions': ['.png', '.jpg', '.jpeg'],
+    'max_workers': 8,
+    'parallel_executor': 'thread',
     'chunk_size': 16384,
     'print_exceptions': False,
 }
