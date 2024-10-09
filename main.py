@@ -1,27 +1,35 @@
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 from tqdm import tqdm
 
 from config_loader import config
-from helpers import convert_size, file_filter, file_hash, file_scan, save_results, select_directory
+from helpers import convert_size, file_filter, file_hash, file_scan, save_results
 
 
 def find_duplicates(files: List[Path]) -> Dict[str, List[Path]]:
-    """Return a dictionary of duplicate files based on their hash."""
+    """Return a dictionary of duplicate files based on their hash, optimized for speed."""
     duplicates = {}
 
-    for file in tqdm(files, desc="Calculating hashes", total=len(files)):
-        file_hash_value = file_hash(file)
-        if file_hash_value is None:
-            continue
+    with ThreadPoolExecutor() as executor:
+        future_to_file = {executor.submit(file_hash, file): file for file in tqdm(files, desc="Preparing parallel hashing", total=len(files))}
 
-        if file_hash_value in duplicates:
-            duplicates[file_hash_value].append(file)
-        else:
-            duplicates[file_hash_value] = [file]
+        for future in tqdm(as_completed(future_to_file), total=len(files), desc="Calculating hashes"):
+            file = future_to_file[future]
+            try:
+                file_hash_value = future.result()
+                if file_hash_value is None:
+                    continue
+                if file_hash_value in duplicates:
+                    duplicates[file_hash_value].append(file)
+                else:
+                    duplicates[file_hash_value] = [file]
+            except Exception as e:
+                if config['print_exceptions']:
+                    print(f"Error processing {file}: {e}")
 
     duplicates = {hash_value: paths for hash_value, paths in duplicates.items() if len(paths) > 1}
 

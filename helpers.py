@@ -10,15 +10,6 @@ from config_loader import config
 from tqdm import tqdm
 
 
-def select_directory() -> Path:
-    """Prompt the user to enter a directory path."""
-    selected_directory = input("Enter a working directory: ")
-    path = Path(selected_directory).expanduser().resolve()
-    if not path.is_dir():
-        raise NotADirectoryError(f"{path} is not a valid directory.")
-    return path
-
-
 def file_scan() -> List[Path]:
     """Custom recursive file collector that handles permission errors gracefully."""
     file_list = []
@@ -37,8 +28,12 @@ def file_scan() -> List[Path]:
                 root_path = Path(root)
                 for file_name in files:
                     file_path = root_path / file_name
-                    if file_path.is_file():
-                        file_list.append(file_path)
+                    try:
+                        if file_path.is_file():
+                            file_list.append(file_path)
+                    except Exception as e:
+                        if config['print_exceptions']:
+                            print(f"Skipped {file_path}: {e}")
                     pbar.update(1)
 
     return file_list
