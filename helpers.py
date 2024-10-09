@@ -21,6 +21,11 @@ def select_directory() -> Path:
 
 def file_scan(directory: Path) -> List[Path]:
     """Custom recursive file collector that handles permission errors gracefully."""
+    try:
+        return list(tqdm(directory.rglob("*"), desc="Scanning files"))
+    except Exception:
+        print(f"An error occurred with {directory}, starting safe scan.")
+
     file_list = []
     with tqdm(desc="Scanning files") as pbar:
         for root, _, files in os.walk(directory):
@@ -34,7 +39,8 @@ def file_scan(directory: Path) -> List[Path]:
                     if config['print_exceptions']:
                         print(f"Skipped {file_path}: {e}")
                 except Exception as e:
-                    print(f"An unexpected error occurred with {file_path}: {e}")
+                    if config['print_exceptions']:
+                        print(f"An unexpected error occurred with {file_path}: {e}")
                 pbar.update(1)
     return file_list
 
@@ -55,7 +61,8 @@ def file_hash(file_path: Path) -> Optional[str]:
         if config['print_exceptions']:
             print(f"Skipped {file_path}: {e}")
     except Exception as e:
-        print(f"An unexpected error occurred with {file_path}: {e}")
+        if config['print_exceptions']:
+            print(f"An unexpected error occurred with {file_path}: {e}")
     return None
 
 
