@@ -24,15 +24,16 @@ def calculate_hash(file_path: Path, chunk_size: int = 16384) -> str:
 def find_duplicates(file_list: List[Path], chunk_size: int) -> Dict:
     """Find files with duplicate content based on their hash, using parallel processing."""
     hash_map = {}
+    workers = cpu_count() or 1
 
-    with ProcessPoolExecutor(max_workers=cpu_count() or 1) as executor:
+    with ProcessPoolExecutor(max_workers=workers) as executor:
 
         future_to_file = {
             executor.submit(calculate_hash, file, chunk_size):
                 file for file in tqdm(file_list, desc="Preparing parallel hashing", total=len(file_list))
         }
 
-        for future in tqdm(as_completed(future_to_file), total=len(file_list), desc="Hashing files"):
+        for future in tqdm(as_completed(future_to_file), total=len(file_list), desc=f"Hashing files using {workers} workers"):
             file = future_to_file[future]
             file_hash = future.result()
             hash_map.setdefault(file_hash, []).append(file)

@@ -17,8 +17,6 @@ def main():
     save_results(duplicates)
 
 if __name__ == "__main__":
-    main()
-    '''
     try:
         main()
     except KeyboardInterrupt:
@@ -27,4 +25,3 @@ if __name__ == "__main__":
         print(f"An unexpected error occurred: {e}")
     finally:
         input("Press Enter to exit...")
-'''
