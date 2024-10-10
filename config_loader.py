@@ -5,6 +5,8 @@ from typing import Dict
 default_config_dict = {
     'search_directories': ['/home'],
     'allowed_extensions': ['.png', '.jpg', '.jpeg'],
+    'max_workers': 8,
+    'parallel_executor': 'thread',
     'chunk_size': 16384,
 }
 
