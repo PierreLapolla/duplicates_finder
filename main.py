@@ -17,11 +17,14 @@ def main():
     save_results(duplicates)
 
 if __name__ == "__main__":
+    main()
+    '''
     try:
         main()
     except KeyboardInterrupt:
         print("Execution interrupted by the user.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An unexpected error occurred: {e}")
     finally:
         input("Press Enter to exit...")
+'''
