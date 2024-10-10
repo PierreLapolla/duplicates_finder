@@ -19,6 +19,8 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+    except KeyboardInterrupt:
+        print("Execution interrupted by the user.")
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:

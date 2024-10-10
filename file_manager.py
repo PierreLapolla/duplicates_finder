@@ -19,4 +19,4 @@ def file_scan(search_directories: List) -> List[Path]:
 
 def file_filter(file_list: List[Path], allowed_extensions: List) -> List[Path]:
     """Filter files by their allowed extensions."""
-    return [file for file in file_list if file.suffix.lower() in allowed_extensions]
+    return [file for file in file_list if file.suffix.lower() in allowed_extensions and file.is_file()]
