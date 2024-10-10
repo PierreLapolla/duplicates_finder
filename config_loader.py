@@ -1,31 +1,26 @@
 from pathlib import Path
-
 import yaml
+from typing import Dict
 
 default_config_dict = {
-    'search_directories': ['/home/pierre'],
+    'search_directories': ['/home'],
     'allowed_extensions': ['.png', '.jpg', '.jpeg'],
     'chunk_size': 16384,
-    'print_exceptions': False,
 }
 
+def load_config(config_file: Path) -> Dict:
+    """Load the configuration from a YAML file or create a new one with default values."""
+    if not config_file.exists():
+        print(f"Config file {config_file} not found. Creating default config.")
+        save_default_config(config_file)
+    return _load_config_from_file(config_file)
 
-def load_config(config_file: Path) -> dict:
-    """Load the configuration from a YAML file, or create a new one with default values if not found."""
-    config_path = Path(config_file)
-    if not config_path.exists():
-        print(f"Configuration file {config_file} not found, creating a new one...")
-        with config_path.open("w") as file:
-            yaml.safe_dump(default_config_dict, file)
+def _load_config_from_file(config_file: Path) -> Dict:
+    with config_file.open("r") as file:
+        return yaml.safe_load(file)
 
-    with config_path.open("r") as file:
-        config = yaml.safe_load(file)
-
-    return config
-
-
-try:
-    config = load_config(Path("config.yaml"))
-except Exception as e:
-    print(f"Error loading configuration: {e}. Using default configuration.")
-    config = default_config_dict
+def save_default_config(config_file: Path) -> None:
+    """Create a default configuration file."""
+    with config_file.open("w") as file:
+        yaml.safe_dump(default_config_dict, file)
+    print(f"Default config saved at {config_file}")
