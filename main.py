@@ -20,8 +20,6 @@ def main():
         print("Execution interrupted by the user.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-    finally:
-        input("Press Enter to exit...")
 
 
 if __name__ == "__main__":
