@@ -1,7 +1,9 @@
-from pathlib import Path
 import os
-from tqdm import tqdm
+from pathlib import Path
 from typing import List
+
+from tqdm import tqdm
+
 
 def file_scan(search_directories: List) -> List[Path]:
     """Scan directories for files, handling errors."""
@@ -16,6 +18,7 @@ def file_scan(search_directories: List) -> List[Path]:
         else:
             print(f"{directory} is not a valid directory.")
     return file_list
+
 
 def file_filter(file_list: List[Path], allowed_extensions: List) -> List[Path]:
     """Filter files by their allowed extensions."""

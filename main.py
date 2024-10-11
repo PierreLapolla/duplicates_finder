@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from config_loader import load_config
-from file_manager import file_scan, file_filter
 from duplicates_finder import find_duplicates, save_results
+from file_manager import file_filter, file_scan
 
 
 def main():
@@ -15,6 +15,7 @@ def main():
     duplicates = find_duplicates(files, config['chunk_size'])
 
     save_results(duplicates)
+
 
 if __name__ == "__main__":
     try:

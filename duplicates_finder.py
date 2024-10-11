@@ -1,12 +1,12 @@
+from concurrent.futures import as_completed, ProcessPoolExecutor
 from datetime import datetime
+from multiprocessing import cpu_count
 from pathlib import Path
 from typing import Dict, List
 
 import pandas as pd
 import xxhash
 from tqdm import tqdm
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from multiprocessing import cpu_count
 
 
 def calculate_hash(file_path: Path, chunk_size: int = 16384) -> str:
@@ -27,18 +27,19 @@ def find_duplicates(file_list: List[Path], chunk_size: int) -> Dict:
     workers = cpu_count() or 1
 
     with ProcessPoolExecutor(max_workers=workers) as executor:
-
         future_to_file = {
             executor.submit(calculate_hash, file, chunk_size):
                 file for file in tqdm(file_list, desc="Preparing parallel hashing", total=len(file_list))
         }
 
-        for future in tqdm(as_completed(future_to_file), total=len(file_list), desc=f"Hashing files using {workers} workers"):
+        for future in tqdm(as_completed(future_to_file), total=len(file_list),
+                           desc=f"Hashing files using {workers} workers"):
             file = future_to_file[future]
             file_hash = future.result()
             hash_map.setdefault(file_hash, []).append(file)
 
     return {hash_value: files for hash_value, files in hash_map.items() if len(files) > 1}
+
 
 def save_results(duplicates: dict):
     """Save the duplicate files to an Excel file with file size and optimized batch writing."""
