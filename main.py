@@ -13,7 +13,7 @@ def main():
 
         files = file_filter(files, config['allowed_extensions'])
 
-        duplicates = find_duplicates(files, config['chunk_size'])
+        duplicates = find_duplicates(files, config['chunk_size'], config['max_workers'])
 
         save_results(duplicates)
     except KeyboardInterrupt:
