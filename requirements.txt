@@ -1,0 +1,4 @@
+tqdm==4.66.5
+PyYAML==6.0.2
+pandas==2.2.2
+xxhash==3.5.0
