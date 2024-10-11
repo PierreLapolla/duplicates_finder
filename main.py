@@ -18,8 +18,6 @@ def main():
         save_results(duplicates)
     except KeyboardInterrupt:
         print("Execution interrupted by the user.")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
 
 
 if __name__ == "__main__":

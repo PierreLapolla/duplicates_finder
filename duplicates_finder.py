@@ -1,4 +1,4 @@
-from concurrent.futures import as_completed, ProcessPoolExecutor
+from concurrent.futures import as_completed, ThreadPoolExecutor
 from datetime import datetime
 from multiprocessing import cpu_count
 from pathlib import Path
@@ -27,7 +27,7 @@ def find_duplicates(file_list: List[Path], chunk_size: int, num_workers: int) ->
     max_workers = cpu_count() or 1
     num_workers = min(num_workers, max_workers)
 
-    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
         future_to_file = {
             executor.submit(calculate_hash, file, chunk_size):
                 file for file in tqdm(file_list, desc="Preparing parallel hashing", total=len(file_list))
