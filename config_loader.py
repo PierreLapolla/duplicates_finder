@@ -6,7 +6,7 @@ import yaml
 default_config_dict = {
     'search_directories': ['/home'],
     'allowed_extensions': ['.png', '.jpg', '.jpeg'],
-    'chunk_size': 16384,
+    'chunk_size': 262144,
     'max_workers': 4,
 }
 
