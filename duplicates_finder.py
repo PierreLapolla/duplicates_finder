@@ -5,14 +5,14 @@ from pathlib import Path
 from typing import Dict, List
 
 import pandas as pd
-import xxhash
+import blake3
 from tqdm import tqdm
 
 
 def calculate_hash(file_path: Path, chunk_size: int = 4 * 1024 * 1024) -> str:
-    """Compute the hash of a file in chunks using xxHash (extremely fast)."""
+    """Compute the hash of a file in chunks using blake3."""
     try:
-        hasher = xxhash.xxh64()
+        hasher = blake3.blake3(max_threads=blake3.blake3.AUTO)
         with file_path.open('rb') as file:
             for chunk in iter(lambda: file.read(chunk_size), b''):
                 hasher.update(chunk)
