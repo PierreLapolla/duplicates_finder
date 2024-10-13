@@ -1,4 +1,4 @@
-from concurrent.futures import as_completed, ThreadPoolExecutor
+from concurrent.futures import as_completed, ProcessPoolExecutor
 from datetime import datetime
 from multiprocessing import cpu_count
 from pathlib import Path
@@ -9,7 +9,7 @@ import xxhash
 from tqdm import tqdm
 
 
-def calculate_hash(file_path: Path, chunk_size: int = 16384) -> str:
+def calculate_hash(file_path: Path, chunk_size: int = 4 * 1024 * 1024) -> str:
     """Compute the hash of a file in chunks using xxHash (extremely fast)."""
     try:
         hasher = xxhash.xxh64()
@@ -27,13 +27,13 @@ def find_duplicates(file_list: List[Path], chunk_size: int, num_workers: int) ->
     max_workers = cpu_count() or 1
     num_workers = min(num_workers, max_workers)
 
-    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+    with ProcessPoolExecutor(max_workers=num_workers) as executor:
         future_to_file = {
             executor.submit(calculate_hash, file, chunk_size):
-                file for file in tqdm(file_list, desc="Preparing parallel hashing", total=len(file_list))
+                file for file in tqdm(file_list, desc="Preparing parallel hashing", total=len(file_list), mininterval=1)
         }
 
-        for future in tqdm(as_completed(future_to_file), total=len(file_list),
+        for future in tqdm(as_completed(future_to_file), total=len(file_list), mininterval=1,
                            desc=f"Hashing files using {num_workers}/{max_workers} workers"):
             file = future_to_file[future]
             file_hash = future.result()
@@ -56,7 +56,8 @@ def save_results(duplicates: dict):
 
     all_data = []
 
-    for hash_value, files in tqdm(duplicates.items(), desc="Preparing excel data", total=len(duplicates)):
+    for hash_value, files in tqdm(duplicates.items(), desc="Preparing excel data", total=len(duplicates),
+                                  mininterval=1):
         for file in files:
             all_data.append({
                 "hash": hash_value,

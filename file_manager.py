@@ -11,7 +11,7 @@ def file_scan(search_directories: List) -> List[Path]:
     for directory in search_directories:
         directory_path = Path(directory).expanduser().resolve()
         if directory_path.is_dir():
-            with tqdm(desc=f"Scanning {directory}") as pbar:
+            with tqdm(desc=f"Scanning {directory}", mininterval=1) as pbar:
                 for root, _, files in os.walk(directory_path):
                     file_list.extend([Path(root) / file for file in files])
                     pbar.update(len(files))
@@ -23,6 +23,6 @@ def file_scan(search_directories: List) -> List[Path]:
 def file_filter(file_list: List[Path], allowed_extensions: List) -> List[Path]:
     """Filter files by their allowed extensions."""
     return [
-        file for file in tqdm(file_list, desc="Filtering files", total=len(file_list))
+        file for file in tqdm(file_list, desc="Filtering files", total=len(file_list), mininterval=1)
         if file.suffix.lower() in allowed_extensions and file.is_file()
     ]
