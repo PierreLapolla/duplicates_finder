@@ -31,6 +31,13 @@ def find_duplicates(file_list: List[Path], chunk_size: int, num_workers: int) ->
     max_workers = cpu_count() or 1
     num_workers = min(num_workers, max_workers)
 
+    if num_workers <= 0:
+        print(f"Invalid number of workers: {num_workers}. Using 1 worker.")
+
+    if chunk_size < 4 * 1024 * 1024:
+        print(f"Chunk size is too small: {chunk_size}. Using 4MB.")
+        chunk_size = 4 * 1024 * 1024
+
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         future_to_file = {
             executor.submit(calculate_hash, file, chunk_size):

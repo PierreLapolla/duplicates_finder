@@ -10,6 +10,14 @@ def scan_files(search_directories: List, allowed_extensions: List) -> List[Path]
     file_list = []
     allowed_extensions_set = {ext.lower() for ext in allowed_extensions}
 
+    if not search_directories:
+        print("No directories to scan.")
+        return file_list
+
+    if not allowed_extensions_set:
+        print("No valid extensions found.")
+        return file_list
+
     for directory in search_directories:
         directory_path = Path(directory).expanduser().resolve()
         if directory_path.is_dir():
