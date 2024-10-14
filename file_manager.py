@@ -13,7 +13,7 @@ def scan_files(search_directories: List, allowed_extensions: List) -> List[Path]
     for directory in search_directories:
         directory_path = Path(directory).expanduser().resolve()
         if directory_path.is_dir():
-            with tqdm(desc=f"Scanning {directory}", mininterval=1) as pbar:
+            with tqdm(desc=f"Scanning and filtering {directory}", mininterval=1) as pbar:
                 for root, _, files in os.walk(directory_path):
                     filtered_files = [
                         file for file in files if os.path.splitext(file)[1].lower() in allowed_extensions_set

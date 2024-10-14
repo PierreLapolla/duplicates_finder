@@ -12,13 +12,17 @@ from tqdm import tqdm
 def calculate_hash(file_path: Path, chunk_size: int = 4 * 1024 * 1024) -> str:
     """Compute the hash of a file in chunks using blake3."""
     try:
-        hasher = blake3.blake3(max_threads=blake3.blake3.AUTO)
+        hasher = blake3.blake3(max_threads=1)
         with file_path.open('rb') as file:
             for chunk in iter(lambda: file.read(chunk_size), b''):
                 hasher.update(chunk)
         return hasher.hexdigest()
-    except Exception:
-        return 'error'
+    except FileNotFoundError:
+        return f"Error: File not found."
+    except PermissionError:
+        return f"Error: Permission denied."
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 
 def find_duplicates(file_list: List[Path], chunk_size: int, num_workers: int) -> Dict:
@@ -68,6 +72,5 @@ def save_results(duplicates: dict):
     df = pd.DataFrame(all_data)
 
     with pd.ExcelWriter(output_file) as writer:
-        df.to_excel(writer, index=False, sheet_name="duplicates")
-
-    print(f"Results saved to {output_file}")
+        for _ in tqdm(range(1), desc=f"Writing to {output_file}", mininterval=1):
+            df.to_excel(writer, index=False, sheet_name="duplicates")
