@@ -67,14 +67,17 @@ def save_results(duplicates: dict):
 
     all_data = []
 
+    group_id = 1
     for hash_value, files in tqdm(duplicates.items(), desc="Preparing excel data", total=len(duplicates),
                                   mininterval=1):
         for file in files:
             all_data.append({
                 "hash": hash_value,
+                "group id": group_id,
                 "path": str(file),
                 "size (MB)": file.stat().st_size / (1024 * 1024)
             })
+        group_id += 1
 
     df = pd.DataFrame(all_data)
 
