@@ -62,7 +62,7 @@ def save_results(duplicates: dict):
             all_data.append({
                 "hash": hash_value,
                 "path": str(file),
-                "size": file.stat().st_size
+                "size (MB)": file.stat().st_size / (1024 * 1024)
             })
 
     df = pd.DataFrame(all_data)
